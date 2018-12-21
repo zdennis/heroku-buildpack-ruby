@@ -36,7 +36,7 @@ class LanguagePack::Helpers::BundlerWrapper
   include LanguagePack::ShellHelpers
 
   BLESSED_BUNDLER_VERSIONS = {}
-  BLESSED_BUNDLER_VERSIONS["1"] = "1.15.2"
+  BLESSED_BUNDLER_VERSIONS["1"] = "1.17.3"
   BLESSED_BUNDLER_VERSIONS["2"] = "2.0.1"
   private_constant :BLESSED_BUNDLER_VERSIONS
 
