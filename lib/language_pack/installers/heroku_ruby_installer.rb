@@ -19,7 +19,10 @@ class LanguagePack::Installers::HerokuRubyInstaller
         ruby_vm = "ruby"
         file.sub!(ruby_vm, "#{ruby_vm}-build")
       end
-      @fetcher.fetch_untar(file)
+      if ruby_override = user_env_hash['HEROKU_RUBY_BINARY_OVERRIDE']
+        warn "Using Unsupported Ruby Binary Override: #{ruby_override}"
+      end
+      @fetcher.fetch_untar(file, {source_override: ruby_override})
     end
   end
 end

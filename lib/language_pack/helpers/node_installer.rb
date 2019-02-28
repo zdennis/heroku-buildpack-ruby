@@ -21,7 +21,7 @@ class LanguagePack::Helpers::NodeInstaller
       node_bin = "#{binary_path}/bin/node"
 
       Dir.chdir(dir) do
-        @fetcher.fetch_untar(@url, node_bin)
+        @fetcher.fetch_untar(@url, {files: node_bin})
       end
 
       FileUtils.mv("#{dir}/#{node_bin}", ".")

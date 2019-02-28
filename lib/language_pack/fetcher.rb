@@ -19,16 +19,17 @@ module LanguagePack
       run!(curl, error_class: FetchError)
     end
 
-    def fetch_untar(path, files_to_extract = nil)
-      curl = curl_command("#{@host_url.join(path)} -s -o")
-      run! "#{curl} - | tar zxf - #{files_to_extract}",
+    def fetch_untar(path, options = {})
+      source_url = options[:source_override] ? options[:source_override] : @host_url.join(path)
+      curl = curl_command("#{source_url} -s -o")
+      run! "#{curl} - | tar zxf - #{options[:files]}",
         error_class: FetchError,
         max_attempts: 3
     end
 
-    def fetch_bunzip2(path, files_to_extract = nil)
+    def fetch_bunzip2(path, files = nil)
       curl = curl_command("#{@host_url.join(path)} -s -o")
-      run!("#{curl} - | tar jxf - #{files_to_extract}", error_class: FetchError)
+      run!("#{curl} - | tar jxf - #{files}", error_class: FetchError)
     end
 
     private
