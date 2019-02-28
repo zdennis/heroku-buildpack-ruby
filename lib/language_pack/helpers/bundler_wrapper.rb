@@ -145,8 +145,8 @@ class LanguagePack::Helpers::BundlerWrapper
       command = "bundle platform --ruby"
 
       puts "======================"
-      puts "bundle -v: #{`bundle -v`}"
-      puts "which bundle: #{`which bundle`}"
+      puts "bundle -v: #{run_stdout('bundle -v', env: env)}"
+      puts "which bundle: #{run_stdout('which bundle', env: env)}"
 
       # Silently check for ruby version
       output  = run_stdout(command, user_env: true, env: env)
