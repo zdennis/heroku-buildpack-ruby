@@ -96,6 +96,18 @@ module LanguagePack
       false
     end
 
+    # Returns the next logical version in the minor series
+    # for example if the current ruby version is
+    # `ruby-2.3.1` then then `next_logical_version(1)`
+    # will produce `ruby-2.3.2`.
+    def next_logical_version(increment = 1)
+      return false if patchlevel_is_significant?
+      split_version = @version_without_patchlevel.split(".")
+      teeny = split_version.pop
+      split_version << teeny.to_i + increment
+      split_version.join(".")
+    end
+
     private
 
     def none
