@@ -31,8 +31,16 @@ class LanguagePack::Ruby < LanguagePack::Base
     @@bundler ||= LanguagePack::Helpers::BundlerWrapper.new.install
   end
 
+  def self.gel
+    @@gel ||= LanguagePack::Helpers::GelWrapper.new
+  end
+
   def bundler
     self.class.bundler
+  end
+
+  def gel
+    self.class.gel
   end
 
   def initialize(build_path, cache_path=nil)
@@ -99,8 +107,8 @@ WARNING
       setup_export
       setup_profiled
       allow_git do
-        install_bundler_in_app
-        build_bundler("development:test")
+        install_dependency_manager_in_app
+        install_dependencies("development:test")
         post_bundler
         create_database_yml
         install_binaries
@@ -311,6 +319,10 @@ SHELL
       ENV["GEM_PATH"] = slug_vendor_base
       ENV["GEM_HOME"] = slug_vendor_base
       ENV["PATH"]     = default_path
+      if gel.gel?
+        ENV["RUBYLIB"]  = "#{gel.rubylib_env}:#{env("RUBYLIB")}"
+        ENV["PATH"] = "#{gel.path_env}:#{default_path}"
+      end
     end
   end
 
@@ -477,6 +489,21 @@ ERROR
     end
   end
 
+  def install_dependency_manager_in_app
+    if gel.gel?
+      install_gel_in_app
+    else
+      install_bundler_in_app
+    end
+  end
+
+  def install_gel_in_app
+    instrument 'ruby.install_gel_in_app' do
+      topic("Installing Gel #{gel.version}")
+      puts gel.install(".")
+    end
+  end
+
   # installs vendored gems into the slug
   def install_bundler_in_app
     instrument 'ruby.install_language_pack_gems' do
@@ -627,6 +654,14 @@ BUNDLE
     FileUtils.chmod(0755, shim_path)
   end
 
+  def install_dependencies(default_without_groups)
+    if gel.gel?
+      build_gel
+    else
+      build_bundler(default_without_groups)
+    end
+  end
+
   # runs bundler to install the dependencies
   def build_bundler(default_bundle_without)
     instrument 'ruby.build_bundler' do
@@ -761,6 +796,36 @@ https://devcenter.heroku.com/articles/ruby-versions#your-ruby-version-is-x-but-y
         FileUtils.rm_rf(dir)
       end
       bundler.clean
+    end
+  end
+
+  def build_gel
+    instrument 'ruby.build_gel' do
+      log("gel") do
+        topic("Installing dependencies using gel #{gel.version}")
+        gel_output = ""
+        # TODO load_gel_cache
+        gel_command = "GEL_STORE=vendor/gel GEL_CACHE=.cache/gel gel install"
+        puts "Running: #{gel_command}"
+        instrument "ruby.gem_install" do
+          gel_time = Benchmark.realtime do
+            gel_output << pipe(gel_command, out: "2>&1", user_env: true)
+          end
+        end
+
+        if $?.success?
+          puts "Gel completed (#{"%.2f" % gel_time}s)"
+          log "gel", :status => "success"
+          # TODO store_gel_cache
+          # TODO gel_clean
+        else
+          error_message = "Failed to install gems via Gel."
+          error_message << "\n#{ENV['PATH']}"
+          pipe("ls vendor/gel-#{gel.version}")
+          # TODO parse for error messages
+          error error_message
+        end
+      end
     end
   end
 
