@@ -1,5 +1,5 @@
-require 'fileutils'
-require 'toml'
+require "fileutils"
+require "toml"
 
 class LanguagePack::Helpers::Layer
   attr_reader :path
@@ -9,10 +9,10 @@ class LanguagePack::Helpers::Layer
     @name = name
     @path = Pathname.new "#{@layer_dir}/#{@name}"
     @toml = if File.exist?(toml_file)
-              TOML.load(File.read(toml_file))
-            else
-              Hash.new
-            end
+      TOML.load(File.read(toml_file))
+    else
+      {}
+    end
 
     @toml[:launch] = launch
     @toml[:build] = build
@@ -20,7 +20,7 @@ class LanguagePack::Helpers::Layer
     if File.exist?(toml_file)
       @toml[:metadata] = TOML.load(File.read(toml_file))[:metadata]
     end
-    @toml[:metadata] ||= Hash.new
+    @toml[:metadata] ||= {}
 
     FileUtils.mkdir_p(@path)
     write
@@ -44,7 +44,7 @@ class LanguagePack::Helpers::Layer
     valid, messages = yield metadata
     unless valid
       if messages.class.included_modules.include?(Enumerable)
-        messages.each {|message| puts message }
+        messages.each { |message| puts message }
       else
         puts messages
       end

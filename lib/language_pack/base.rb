@@ -18,7 +18,7 @@ class LanguagePack::Base
   include LanguagePack::ShellHelpers
   extend LanguagePack::ShellHelpers
 
-  VENDOR_URL           = ENV['BUILDPACK_VENDOR_URL'] || "https://s3-external-1.amazonaws.com/heroku-buildpack-ruby"
+  VENDOR_URL           = ENV["BUILDPACK_VENDOR_URL"] || "https://s3-external-1.amazonaws.com/heroku-buildpack-ruby"
   DEFAULT_LEGACY_STACK = "cedar"
   ROOT_DIR             = File.expand_path("../../..", __FILE__)
 
@@ -27,15 +27,15 @@ class LanguagePack::Base
   # changes directory to the build_path
   # @param [String] the path of the build dir
   # @param [String] the path of the cache dir this is nil during detect and release
-  def initialize(build_path, cache_path = nil, layer_dir=nil)
-     self.class.instrument "base.initialize" do
-      @build_path    = build_path
+  def initialize(build_path, cache_path = nil, layer_dir = nil)
+    self.class.instrument "base.initialize" do
+      @build_path = build_path
       @stack         = ENV.fetch("STACK")
       @cache         = LanguagePack::Cache.new(cache_path)
       @metadata      = LanguagePack::Metadata.new(@cache)
       @bundler_cache = LanguagePack::BundlerCache.new(@cache, @stack)
       @id            = Digest::SHA1.hexdigest("#{Time.now.to_f}-#{rand(1000000)}")[0..10]
-      @fetchers      = {:buildpack => LanguagePack::Fetcher.new(VENDOR_URL) }
+      @fetchers      = {buildpack: LanguagePack::Fetcher.new(VENDOR_URL)}
       @layer_dir     = layer_dir
 
       Dir.chdir build_path
@@ -82,10 +82,10 @@ class LanguagePack::Base
   # this is called to build the slug
   def compile
     write_release_yaml
-    instrument 'base.compile' do
+    instrument "base.compile" do
       Kernel.puts ""
       warnings.each do |warning|
-        Kernel.puts "\e[1m\e[33m###### WARNING:\e[0m"# Bold yellow
+        Kernel.puts "\e[1m\e[33m###### WARNING:\e[0m" # Bold yellow
         Kernel.puts ""
         puts warning
         Kernel.puts ""
@@ -101,10 +101,10 @@ class LanguagePack::Base
 
   def build
     write_release_toml
-    instrument 'base.compile' do
+    instrument "base.compile" do
       Kernel.puts ""
       warnings.each do |warning|
-        Kernel.puts "\e[1m\e[33m###### WARNING:\e[0m"# Bold yellow
+        Kernel.puts "\e[1m\e[33m###### WARNING:\e[0m" # Bold yellow
         Kernel.puts ""
         puts warning
         Kernel.puts ""
@@ -133,27 +133,27 @@ class LanguagePack::Base
     layer = LanguagePack::Helpers::Layer.new(@layer_dir, "env", launch: true)
     FileUtils.mkdir_p("#{layer.path}/env.launch")
     release["config_vars"].each do |key, value|
-      File.open("#{layer.path}/env.launch/#{key.upcase}.override", 'w') do |f|
+      File.open("#{layer.path}/env.launch/#{key.upcase}.override", "w") do |f|
         f.write(value)
       end
     end
 
-    release_toml = release["default_process_types"].map do |type, command|
-      <<PROCESSES
-[[processes]]
-type = "#{type}"
-command = "#{command}"
-PROCESSES
-    end
-    File.open("#{@layer_dir}/launch.toml", 'a') do |f|
+    release_toml = release["default_process_types"].map { |type, command|
+      <<~PROCESSES
+        [[processes]]
+        type = "#{type}"
+        command = "#{command}"
+      PROCESSES
+    }
+    File.open("#{@layer_dir}/launch.toml", "a") do |f|
       f.write(release_toml.join("\n"))
     end
   end
 
   def write_release_yaml
     release = build_release
-    FileUtils.mkdir("tmp") unless File.exists?("tmp")
-    File.open("tmp/heroku-buildpack-release-step.yml", 'w') do |f|
+    FileUtils.mkdir("tmp") unless File.exist?("tmp")
+    File.open("tmp/heroku-buildpack-release-step.yml", "w") do |f|
       f.write(release.to_yaml)
     end
 
@@ -173,33 +173,31 @@ PROCESSES
     warn msg
   end
 
-
-
   # log output
   # Ex. log "some_message", "here", :someattr="value"
   def log(*args)
-    args.concat [:id => @id]
-    args.concat [:framework => self.class.to_s.split("::").last.downcase]
+    args.concat [id: @id]
+    args.concat [framework: self.class.to_s.split("::").last.downcase]
 
     start = Time.now.to_f
-    log_internal args, :start => start
+    log_internal args, start: start
 
     if block_given?
       begin
         ret = yield
         finish = Time.now.to_f
-        log_internal args, :status => "complete", :finish => finish, :elapsed => (finish - start)
+        log_internal args, status: "complete", finish: finish, elapsed: (finish - start)
         return ret
-      rescue StandardError => ex
+      rescue => ex
         finish  = Time.now.to_f
         message = Shellwords.escape(ex.message)
-        log_internal args, :status => "error", :finish => finish, :elapsed => (finish - start), :message => message
+        log_internal args, status: "error", finish: finish, elapsed: (finish - start), message: message
         raise ex
       end
     end
   end
 
-private ##################################
+  private ##################################
 
   # sets up the environment variables for the build process
   def setup_language_pack_environment
@@ -219,7 +217,7 @@ private ##################################
   end
 
   def set_env_override(key, val)
-    add_to_profiled %{export #{key}="#{val.gsub('"','\"')}"}
+    add_to_profiled %(export #{key}="#{val.gsub('"', '\"')}")
   end
 
   def add_to_export(string)
@@ -254,7 +252,7 @@ private ##################################
         elsif option == :path
           "export #{key}=#{val}:$#{key}"
         else
-          %{export #{key}="#{val.gsub('"','\"')}"}
+          %(export #{key}="#{val.gsub('"', '\"')}")
         end
 
       export = File.join(ROOT_DIR, "export")
@@ -264,13 +262,13 @@ private ##################################
     end
   end
 
-  #def set_export_default(key, val, layer = nil)
+  # def set_export_default(key, val, layer = nil)
   #  add_to_export "export #{key}=${#{key}:-#{val}}"
-  #end
+  # end
 
-  #def set_export_override(key, val)
+  # def set_export_override(key, val)
   #  add_to_export %{export #{key}="#{val.gsub('"','\"')}"}
-  #end
+  # end
 
   def set_export_default(key, val, layer = nil)
     export key, val, layer: layer, option: :default
@@ -286,17 +284,17 @@ private ##################################
 
   def log_internal(*args)
     message = build_log_message(args)
-    %x{ logger -p user.notice -t "slugc[$$]" "buildpack-ruby #{message}" }
+    `logger -p user.notice -t "slugc[$$]" "buildpack-ruby #{message}"`
   end
 
   def build_log_message(args)
-    args.map do |arg|
+    args.map { |arg|
       case arg
         when Float then "%0.2f" % arg
         when Array then build_log_message(arg)
-        when Hash  then arg.map { |k,v| "#{k}=#{build_log_message([v])}" }.join(" ")
+        when Hash  then arg.map { |k, v| "#{k}=#{build_log_message([v])}" }.join(" ")
         else arg
       end
-    end.join(" ")
+    }.join(" ")
   end
 end
