@@ -108,6 +108,21 @@ module LanguagePack
       split_version.join(".")
     end
 
+    def next_minor_version(increment = 1)
+      split_version = @version_without_patchlevel.split(".")
+      split_version[1] = split_version[1].to_i + increment
+      split_version[2] = 0
+      split_version.join(".")
+    end
+
+    def next_major_version(increment = 1)
+      split_version = @version_without_patchlevel.split("-").last.split(".")
+      split_version[0] = Integer(split_version[0]) + increment
+      split_version[1] = 0
+      split_version[2] = 0
+      return "ruby-#{split_version.join(".")}"
+    end
+
     private
 
     def none

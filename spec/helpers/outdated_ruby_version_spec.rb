@@ -13,6 +13,8 @@ describe LanguagePack::Helpers::OutdatedRubyVersion do
 
     outdated.call
     expect(outdated.suggested_ruby_minor_version).to eq("ruby-2.2.10")
+    expect(outdated.eol?).to eq(true)
+    expect(outdated.maybe_eol?).to eq(true)
   end
 
   it "detects returns original ruby version when using the latest" do

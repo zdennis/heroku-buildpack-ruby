@@ -108,6 +108,7 @@ WARNING
       end
       config_detect
       best_practice_warnings
+      warn_outdated_ruby
       cleanup
       super
     end
@@ -367,6 +368,54 @@ SHELL
 
   def warn_outdated_ruby
     return unless defined?(@outdated)
+
+    @warn_outdated ||= begin
+      warn_outdated_minor
+      warn_outdated_eol
+      true
+    end
+  end
+
+  def warn_outdated_eol
+    return unless @outdated.maybe_eol?
+
+    if @outdated.eol?
+      warn(<<~WARNING)
+        EOL Ruby Version
+
+        You are using a Ruby version that has reached its End of Life (EOL)
+
+        Your current Ruby version no longer receives security updates from
+        Ruby Core and may have serious vulnerabilities. While you will continue
+        to be able to deploy on Heroku with this Ruby version you must upgrade
+        to a non-EOL version to be eligable to receive support.
+
+        Please upgrade your Ruby version.
+
+        For a list of supported Ruby versions see:
+          https://devcenter.heroku.com/articles/ruby-support#supported-runtimes
+      WARNING
+    else
+      # Maybe EOL
+      warn(<<~WARNING)
+        Potential EOL Ruby Version
+
+        You are using a Ruby version that may have reached its End of Life (EOL)
+
+        The Ruby version you are using has either already reached its EOL or
+        it will become EOL by the end of this year when the next Ruby version
+        is released. Once a Ruby version becomes EOL, it will no longer receive
+        security updates from Ruby core and may have serious vulnerabilities.
+
+        Please upgrade your Ruby version.
+
+        For a list of supported Ruby versions see:
+          https://devcenter.heroku.com/articles/ruby-support#supported-runtimes
+      WARNING
+    end
+  end
+
+  def warn_outdated_minor
     suggested_ruby_minor_version = @outdated.suggested_ruby_minor_version
 
     return if suggested_ruby_minor_version == ruby_version
@@ -378,8 +427,10 @@ SHELL
       The latest version will include security and bug fixes, we always recommend
       running the latest version of your minor release.
 
+      Please upgrade your Ruby version.
+
       For all available Ruby versions see:
-        https://devcenter.heroku.com/articles/ruby-versions
+        https://devcenter.heroku.com/articles/ruby-support#supported-runtimes
     WARNING
   end
 
@@ -400,8 +451,6 @@ SHELL
         fetcher: installer.fetcher
       )
       @outdated.call
-
-      installer.check_for_higher_minor_version_in_background(ruby_version)
 
       @metadata.write("buildpack_ruby_version", ruby_version.version_for_download)
 

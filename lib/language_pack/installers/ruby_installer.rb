@@ -20,7 +20,6 @@ module LanguagePack::Installers::RubyInstaller
   end
 
   def install(ruby_version, install_dir)
-    warn_outdated_version(ruby_version)
     fetch_unpack(ruby_version, install_dir)
     setup_binstubs(install_dir)
   end
