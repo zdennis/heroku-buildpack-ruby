@@ -89,10 +89,14 @@ end
 
 describe "Raise errors on specific gems" do
   it "should should raise on sqlite3" do
-    Hatchet::Runner.new("sqlite3_gemfile", allow_failure: true).deploy do |app|
+    before_deploy = -> { run!(%Q{echo "ruby '2.5.4' >> Gemfile"}) }
+    Hatchet::Runner.new("sqlite3_gemfile", allow_failure: true, before_deploy: before_deploy).deploy do |app|
       expect(app).not_to be_deployed
       expect(app.output).to include("Detected sqlite3 gem which is not supported")
       expect(app.output).to include("devcenter.heroku.com/articles/sqlite3")
+
+      # Test minor version warnings on failure
+      expect(app.output).to include("There is a more recent Ruby version available")
     end
   end
 end

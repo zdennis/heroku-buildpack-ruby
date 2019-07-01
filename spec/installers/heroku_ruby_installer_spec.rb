@@ -4,22 +4,6 @@ describe LanguagePack::Installers::HerokuRubyInstaller do
   let(:installer)    { LanguagePack::Installers::HerokuRubyInstaller.new("cedar-14") }
   let(:ruby_version) { LanguagePack::RubyVersion.new("ruby-2.3.3") }
 
-  describe "#version warning" do
-    it "should warn of more recent Ruby versions" do
-      installer = LanguagePack::Installers::HerokuRubyInstaller.new("heroku-16")
-      max_version = installer.warn_outdated_version(ruby_version)
-      expect(max_version).to eq("ruby-2.3.8")
-    end
-
-    it "should not warn when using the most recent ruby version" do
-      installer = LanguagePack::Installers::HerokuRubyInstaller.new("heroku-16")
-      ruby_version = LanguagePack::RubyVersion.new("ruby-2.3.8")
-
-      max_version = installer.warn_outdated_version(ruby_version)
-      expect(max_version).to eq(false)
-    end
-  end
-
   describe "#fetch_unpack" do
     it "should fetch and unpack mri" do
       Dir.mktmpdir do |dir|

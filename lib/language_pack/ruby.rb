@@ -111,6 +111,9 @@ WARNING
       cleanup
       super
     end
+  rescue => e
+    warn_outdated_ruby
+    raise e
   end
 
   def cleanup
@@ -362,18 +365,43 @@ SHELL
     end
   end
 
+  def warn_outdated_ruby
+    return unless defined?(@outdated)
+    suggested_ruby_minor_version = @outdated.suggested_ruby_minor_version
+
+    return if suggested_ruby_minor_version == ruby_version
+    warn(<<~WARNING)
+      There is a more recent Ruby version available for you to use:
+
+      #{suggested_ruby_minor_version}
+
+      The latest version will include security and bug fixes, we always recommend
+      running the latest version of your minor release.
+
+      For all available Ruby versions see:
+        https://devcenter.heroku.com/articles/ruby-versions
+    WARNING
+  end
+
   # install the vendored ruby
   # @return [Boolean] true if it installs the vendored ruby and false otherwise
   def install_ruby
     instrument 'ruby.install_ruby' do
       return false unless ruby_version
-
       installer = LanguagePack::Installers::RubyInstaller.installer(ruby_version).new(@stack)
 
       if ruby_version.build?
         installer.fetch_unpack(ruby_version, build_ruby_path, true)
       end
       installer.install(ruby_version, slug_vendor_ruby)
+
+      @outdated = LanguagePack::Helpers::OutdatedRubyVersion.new(
+        ruby_version: ruby_version,
+        fetcher: installer.fetcher
+      )
+      @outdated.call
+
+      installer.check_for_higher_minor_version_in_background(ruby_version)
 
       @metadata.write("buildpack_ruby_version", ruby_version.version_for_download)
 
