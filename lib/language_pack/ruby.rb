@@ -608,9 +608,29 @@ WARNING
   def write_bundler_shim(path)
     FileUtils.mkdir_p(path)
     shim_path = "#{path}/bundle"
-    puts "shim path: #{shim_path}"
     File.open(shim_path, "w") do |file|
-      file.print %q{lol}
+      file.print <<-BUNDLE
+#!/usr/bin/env ruby
+require 'rubygems'
+
+version = "#{bundler.version}"
+
+if ARGV.first
+  str = ARGV.first
+  str = str.dup.force_encoding("BINARY") if str.respond_to? :force_encoding
+  if str =~ /\A_(.*)_\z/ and Gem::Version.correct?($1) then
+    version = $1
+    ARGV.shift
+  end
+end
+
+if Gem.respond_to?(:activate_bin_path)
+load Gem.activate_bin_path('bundler', 'bundle', version)
+else
+gem "bundler", version
+load Gem.bin_path("bundler", "bundle", version)
+end
+BUNDLE
     end
     FileUtils.chmod(0755, shim_path)
   end
