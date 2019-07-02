@@ -689,7 +689,7 @@ WARNING
 
           # we need to set BUNDLE_CONFIG and BUNDLE_GEMFILE for
           # codon since it uses bundler.
-         env_vars["BUNDLE_GEMFILE"] = "#{pwd}/Gemfile"
+          env_vars["BUNDLE_GEMFILE"] = "#{pwd}/Gemfile"
           env_vars["BUNDLE_CONFIG"] = "#{pwd}/.bundle/config"
           env_vars["CPATH"] = noshellescape("#{yaml_include}:$CPATH")
           env_vars["CPPATH"] = noshellescape("#{yaml_include}:$CPPATH")
@@ -700,6 +700,9 @@ WARNING
           env_vars["JAVA_HOME"]                    = noshellescape("#{pwd}/$JAVA_HOME") if ruby_version.jruby?
           env_vars["BUNDLER_LIB_PATH"]             = "#{bundler_path}" if ruby_version.ruby_version == "1.8.7"
           env_vars["BUNDLE_DISABLE_VERSION_CHECK"] = "true"
+
+          puts "which bundle: #{`which bundle`}"
+          puts "which gem: #{`which gem`}"
 
           puts "Running: #{bundle_command}"
           instrument "ruby.bundle_install" do
