@@ -794,12 +794,14 @@ WARNING
 
           # write_bundler_shim("vendor/bundle/bin")
 
-          puts "cat vendor/bundle/bin/bundle: #{`cat vendor/bundle/bin/bundle`}"
+          # puts "cat vendor/bundle/bin/bundle: #{`cat vendor/bundle/bin/bundle`}"
           puts "which bundle: #{`which bundle`}"
           puts "bundle -v: #{`bundle -v`}"
           puts "which gem: #{`which gem`}"
           puts "ls vendor: #{`ls vendor`}"
           puts "ls vendor/bundle: #{`ls vendor/bundle`}"
+
+          ENV['BUNDLER_VERSION'] = '2.0.2'
 
           puts "Running: #{bundle_command}"
           instrument "ruby.bundle_install" do
