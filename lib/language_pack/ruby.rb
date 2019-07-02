@@ -710,9 +710,12 @@ m = Module.new do
   end
 end
 
+puts "calling load_bundler!"
 m.load_bundler!
+puts "done calling load_bundler!"
 
 if m.invoked_as_script?
+  puts "invoked as script"
   load Gem.bin_path("bundler", "bundle")
 end
 }
