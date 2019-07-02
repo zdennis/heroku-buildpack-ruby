@@ -609,8 +609,7 @@ WARNING
     FileUtils.mkdir_p(path)
     shim_path = "#{path}/bundle"
     File.open(shim_path, "w") do |file|
-      file.print %q{
-#!/usr/bin/env ruby
+      file.print %q{#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 #
@@ -716,7 +715,6 @@ m.load_bundler!
 if m.invoked_as_script?
   load Gem.bin_path("bundler", "bundle")
 end
-
 }
     end
     FileUtils.chmod(0755, shim_path)
