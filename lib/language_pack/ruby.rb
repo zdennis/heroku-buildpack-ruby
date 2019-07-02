@@ -702,6 +702,7 @@ WARNING
           env_vars["BUNDLE_DISABLE_VERSION_CHECK"] = "true"
 
           puts "which bundle: #{`which bundle`}"
+          puts "bundle -v: #{`bundle -v`}"
           puts "which gem: #{`which gem`}"
           puts "ls vendor: #{`ls vendor`}"
           puts "ls vendor/bundle: #{`ls vendor/bundle`}"
