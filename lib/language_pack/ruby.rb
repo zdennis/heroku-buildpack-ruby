@@ -788,6 +788,7 @@ WARNING
           env_vars["BUNDLER_LIB_PATH"]             = "#{bundler_path}" if ruby_version.ruby_version == "1.8.7"
           env_vars["BUNDLE_DISABLE_VERSION_CHECK"] = "true"
 
+          puts "cat vendor/bundle/bin/bundle: #{`cat vendor/bundle/bin/bundle`}"
           puts "which bundle: #{`which bundle`}"
           puts "bundle -v: #{`bundle -v`}"
           puts "which gem: #{`which gem`}"
