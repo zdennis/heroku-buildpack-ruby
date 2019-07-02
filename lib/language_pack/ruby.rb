@@ -608,6 +608,7 @@ WARNING
   def write_bundler_shim(path)
     FileUtils.mkdir_p(path)
     shim_path = "#{path}/bundle"
+    puts "shim path: #{shim_path}"
     File.open(shim_path, "w") do |file|
       file.print %q{
 #!/usr/bin/env ruby
