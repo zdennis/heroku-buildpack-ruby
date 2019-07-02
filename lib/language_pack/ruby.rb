@@ -703,6 +703,8 @@ WARNING
 
           puts "which bundle: #{`which bundle`}"
           puts "which gem: #{`which gem`}"
+          puts "ls vendor: #{`ls vendor`}"
+          puts "ls vendor: #{`ls vendor/bundle`}"
 
           puts "Running: #{bundle_command}"
           instrument "ruby.bundle_install" do
