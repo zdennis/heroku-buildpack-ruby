@@ -495,7 +495,7 @@ ERROR
 
       # write bundler shim, so we can control the version bundler used
       # Ruby 2.6.0 started vendoring bundler
-      write_bundler_shim("vendor/bundle/bin") #if ruby_version.vendored_bundler?
+       #if ruby_version.vendored_bundler?
     end
   end
 
@@ -701,12 +701,15 @@ WARNING
           env_vars["BUNDLER_LIB_PATH"]             = "#{bundler_path}" if ruby_version.ruby_version == "1.8.7"
           env_vars["BUNDLE_DISABLE_VERSION_CHECK"] = "true"
 
+          write_bundler_shim("vendor/bundle/bin")
+
           puts "cat vendor/bundle/bin/bundle: #{`cat vendor/bundle/bin/bundle`}"
           puts "which bundle: #{`which bundle`}"
           puts "bundle -v: #{`bundle -v`}"
           puts "which gem: #{`which gem`}"
           puts "ls vendor: #{`ls vendor`}"
           puts "ls vendor/bundle: #{`ls vendor/bundle`}"
+
 
           puts "Running: #{bundle_command}"
           instrument "ruby.bundle_install" do
